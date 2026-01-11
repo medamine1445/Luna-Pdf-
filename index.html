@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>LunaPDF Pro - Perfect Quality</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1a2332; transition: background 0.3s; }
+        body { padding: 12px; overflow-y: auto; background: #f0f4f8; }
+        body.dark-mode { background: #1a1f2e; color: #e8eef5; }
+        .header { text-align: center; padding: 16px 0; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 40px; flex: 1; }
+        .header-center { flex: 2; }
+        .header h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; color: #1f8fa3; }
+        .header p { font-size: 12px; color: #666; }
+        body.dark-mode .header p { color: #aaa; }
+        .dark-toggle { width: 45px; height: 24px; background: #ccc; border: none; border-radius: 12px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+        .dark-toggle.active { background: #1f8fa3; color: white; }
+        .card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: background 0.3s; }
+        body.dark-mode .card { background: #252d3d; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        .upload-box { border: 2px dashed #1f8fa3; border-radius: 12px; padding: 32px 16px; text-align: center; cursor: pointer; background: linear-gradient(135deg, rgba(31,143,163,0.05), rgba(16,185,129,0.05)); transition: all 0.3s; }
+        body.dark-mode .upload-box { background: linear-gradient(135deg, rgba(31,143,163,0.1), rgba(16,185,129,0.1)); }
+        .upload-box:hover { border-color: #10b981; }
+        .upload-box:active { opacity: 0.8; }
+        .upload-icon { font-size: 40px; margin-bottom: 12px; display: block; }
+        .upload-box h3 { font-size: 16px; font-weight: 600; margin: 8px 0; }
+        .upload-box p { font-size: 12px; color: #666; }
+        body.dark-mode .upload-box p { color: #aaa; }
+        #fileInput { display: none; }
+        .file-info { background: #f5f5f5; padding: 12px; border-radius: 8px; font-size: 13px; color: #666; margin-top: 12px; }
+        body.dark-mode .file-info { background: #1f2633; color: #aaa; }
+        .file-info strong { color: #1f8fa3; }
+        .alert-box { background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 12px; margin-bottom: 12px; color: #856404; font-size: 13px; }
+        body.dark-mode .alert-box { background: #3a3020; border-color: #ffc107; color: #ffd54f; }
+        .control-section { margin-bottom: 16px; }
+        .control-label { font-size: 12px; font-weight: 600; text-transform: uppercase; color: #1f8fa3; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .toggle-row { display: flex; align-items: center; gap: 12px; padding: 12px; background: #f9f9f9; border-radius: 8px; transition: background 0.3s; }
+        body.dark-mode .toggle-row { background: #1f2633; }
+        .toggle-row label { flex: 1; font-size: 14px; cursor: pointer; margin: 0; }
+        .toggle-switch { position: relative; width: 50px; height: 28px; background: #ccc; border-radius: 14px; cursor: pointer; transition: background 0.3s; }
+        .toggle-switch.active { background: #1f8fa3; }
+        .toggle-switch::after { content: ''; position: absolute; width: 24px; height: 24px; background: white; border-radius: 12px; top: 2px; left: 2px; transition: left 0.3s; }
+        .toggle-switch.active::after { left: 24px; }
+        .desc { font-size: 12px; color: #999; margin-top: 6px; padding: 0 12px; }
+        body.dark-mode .desc { color: #777; }
+        .slider-group { padding: 12px; background: #f9f9f9; border-radius: 8px; margin-top: 8px; transition: background 0.3s; }
+        body.dark-mode .slider-group { background: #1f2633; }
+        .slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .slider-row:last-child { margin-bottom: 0; }
+        input[type="range"] { flex: 1; height: 6px; border-radius: 3px; outline: none; -webkit-appearance: none; appearance: none; background: linear-gradient(to right, #1f8fa3 0%, #1f8fa3 var(--value), #ddd var(--value), #ddd 100%); }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #1f8fa3; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #1f8fa3; cursor: pointer; border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .slider-value { min-width: 50px; text-align: right; font-weight: 700; color: #1f8fa3; font-size: 14px; }
+        .number-input { width: 70px; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; text-align: center; color: #1a2332; background: white; }
+        body.dark-mode .number-input { background: #1f2633; border-color: #444; color: #e8eef5; }
+        .input-field { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; margin-top: 6px; background: white; color: #1a2332; transition: all 0.3s; }
+        body.dark-mode .input-field { background: #1f2633; border-color: #444; color: #e8eef5; }
+        .input-field:focus { outline: none; border-color: #1f8fa3; }
+        .status { padding: 12px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; margin-bottom: 12px; display: none; }
+        .status.show { display: block; }
+        .status.success { background: rgba(16,185,129,0.1); color: #047857; border: 1px solid rgba(16,185,129,0.3); }
+        body.dark-mode .status.success { background: rgba(16,185,129,0.15); color: #4ade80; }
+        .status.error { background: rgba(239,68,68,0.1); color: #991b1b; border: 1px solid rgba(239,68,68,0.3); }
+        body.dark-mode .status.error { background: rgba(239,68,68,0.15); color: #f87171; }
+        .status.info { background: rgba(31,143,163,0.1); color: #1f8fa3; border: 1px solid rgba(31,143,163,0.3); }
+        body.dark-mode .status.info { background: rgba(31,143,163,0.15); color: #38bdf8; }
+        .progress-container { display: none; margin-bottom: 16px; align-items: center; gap: 16px; padding: 16px; background: #f9f9f9; border-radius: 12px; }
+        body.dark-mode .progress-container { background: #1f2633; }
+        .progress-container.show { display: flex; }
+        .circular-progress { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
+        .circular-progress svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .progress-bg { fill: none; stroke: #e0e0e0; stroke-width: 8; }
+        body.dark-mode .progress-bg { stroke: #444; }
+        .progress-fill { fill: none; stroke: url(#progressGradient); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 0 565.48; transition: stroke-dasharray 0.3s; }
+        .progress-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; font-size: 28px; font-weight: 700; color: #1f8fa3; }
+        .progress-info { flex: 1; }
+        .progress-info-text { font-size: 14px; font-weight: 600; color: #1a2332; margin-bottom: 6px; }
+        body.dark-mode .progress-info-text { color: #e8eef5; }
+        .progress-info-detail { font-size: 12px; color: #666; margin-bottom: 4px; }
+        body.dark-mode .progress-info-detail { color: #aaa; }
+        .tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 2px solid #ddd; }
+        body.dark-mode .tabs { border-bottom-color: #444; }
+        .tab { padding: 12px 16px; background: none; border: none; font-size: 13px; font-weight: 600; cursor: pointer; color: #999; border-bottom: 3px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab.active { color: #1f8fa3; border-bottom-color: #1f8fa3; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .buttons { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+        .btn { flex: 1; min-width: 100px; padding: 14px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; }
+        .btn--process { background: linear-gradient(135deg, #1f8fa3 0%, #157a91 100%); color: white; box-shadow: 0 4px 12px rgba(31,143,163,0.3); }
+        .btn--process:active { transform: scale(0.98); }
+        .btn--process:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn--download { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; box-shadow: 0 4px 12px rgba(16,185,129,0.3); display: none; }
+        .btn--download:active { transform: scale(0.98); }
+        .btn--download.show { display: flex; align-items: center; justify-content: center; }
+        .btn--reset { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; display: none; }
+        .btn--reset.show { display: flex; align-items: center; justify-content: center; }
+        .crop-mode-selector { display: flex; gap: 8px; margin-bottom: 12px; }
+        .crop-mode-btn { flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 8px; background: white; color: #666; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .crop-mode-btn.active { border-color: #1f8fa3; background: #1f8fa3; color: white; }
+        body.dark-mode .crop-mode-btn { background: #1f2633; border-color: #444; color: #aaa; }
+        body.dark-mode .crop-mode-btn.active { border-color: #1f8fa3; background: #1f8fa3; color: white; }
+        @media (max-width: 480px) { body { padding: 8px; } .card { padding: 12px; margin-bottom: 10px; } .header { padding: 12px 0; margin-bottom: 12px; flex-direction: column; gap: 12px; } .logo { font-size: 36px; margin-bottom: 6px; flex: unset; } .header-center { flex: unset; } .btn { padding: 12px; font-size: 14px; } .progress-container { flex-direction: column; } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🌙</div>
+        <div class="header-center">
+            <h1>LunaPDF Pro</h1>
+            <p>Crystal Clear Quality ✨</p>
+        </div>
+        <button class="dark-toggle" id="darkToggle">🌙</button>
+    </div>
+
+    <div id="status" class="status"></div>
+
+    <div class="card">
+        <div class="alert-box">
+            💡 <strong>For best quality:</strong> Use <strong>PNG format</strong> + <strong>Scale 2.0x</strong> in Quality tab!
+        </div>
+        <div class="upload-box" id="uploadZone">
+            <span class="upload-icon">📤</span>
+            <h3>Upload PDF</h3>
+            <p>Tap to choose file</p>
+            <input type="file" id="fileInput" accept=".pdf">
+        </div>
+        <div id="fileInfo" class="file-info" style="display:none;">
+            <strong>File:</strong> <span id="fileName"></span><br>
+            <strong>Pages:</strong> <span id="pageCount"></span> | <strong>Size:</strong> <span id="fileSize"></span>
+        </div>
+    </div>
+
+    <div class="card" id="settings" style="display:none;">
+        <div class="tabs">
+            <button class="tab active" data-tab="basic">Basic</button>
+            <button class="tab" data-tab="crop">Crop</button>
+            <button class="tab" data-tab="advanced">Advanced</button>
+            <button class="tab" data-tab="quality">Quality</button>
+        </div>
+
+        <div id="basic" class="tab-content active">
+            <div class="control-section">
+                <div class="control-label">📍 Smart Alignment</div>
+                <div class="toggle-row"><label for="align">Auto-detect alignment</label><div class="toggle-switch" id="alignToggle"></div></div>
+                <input type="checkbox" id="align" style="display:none;">
+                <p class="desc">Detects uneven margins and corrects alignment</p>
+                <div class="slider-group" id="alignSlider" style="display:none;">
+                    <div class="slider-row"><input type="range" id="alignStrength" min="0" max="100" value="70" style="--value:70%;"><span class="slider-value"><span id="alignVal">70</span>%</span></div>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <div class="control-label">🗑️ Delete Pages</div>
+                <div class="toggle-row"><label for="delete">Remove pages</label><div class="toggle-switch" id="deleteToggle"></div></div>
+                <input type="checkbox" id="delete" style="display:none;">
+                <p class="desc">Enter page numbers to delete (e.g., 2,5,7 or 1-3,8)</p>
+                <div class="slider-group" id="deleteSlider" style="display:none;">
+                    <input type="text" class="input-field" id="deletePages" placeholder="e.g., 1,2,5 or 1-3,5">
+                </div>
+            </div>
+
+            <div class="control-section">
+                <div class="control-label">🔄 Page Order</div>
+                <div class="toggle-row"><label for="reverse">Reverse pages</label><div class="toggle-switch" id="reverseToggle"></div></div>
+                <input type="checkbox" id="reverse" style="display:none;">
+            </div>
+        </div>
+
+        <div id="crop" class="tab-content">
+            <div class="control-section">
+                <div class="control-label">✂️ Crop White Margins</div>
+                <div class="toggle-row"><label for="cropEnable">Enable cropping</label><div class="toggle-switch" id="cropEnableToggle"></div></div>
+                <input type="checkbox" id="cropEnable" style="display:none;">
+                <p class="desc">Remove white space around pages</p>
+                
+                <div class="slider-group" id="cropOptions" style="display:none;">
+                    <div class="crop-mode-selector">
+                        <button class="crop-mode-btn active" id="cropModeManual">📏 Manual</button>
+                        <button class="crop-mode-btn" id="cropModeAuto">🤖 Auto</button>
+                    </div>
+                    
+                    <div id="manualCropControls">
+                        <p style="font-size: 12px; color: #1f8fa3; font-weight: 600; margin-bottom: 12px;">Set margins to remove (in pixels):</p>
+                        <div class="slider-row">
+                            <label style="font-size: 12px; min-width: 50px;">⬆️ Top:</label>
+                            <input type="range" id="cropTop" min="0" max="200" value="0" style="--value:0%;">
+                            <span class="slider-value"><span id="cropTopVal">0</span>px</span>
+                        </div>
+                        <div class="slider-row">
+                            <label style="font-size: 12px; min-width: 50px;">⬇️ Bottom:</label>
+                            <input type="range" id="cropBottom" min="0" max="200" value="0" style="--value:0%;">
+                            <span class="slider-value"><span id="cropBottomVal">0</span>px</span>
+                        </div>
+                        <div class="slider-row">
+                            <label style="font-size: 12px; min-width: 50px;">⬅️ Left:</label>
+                            <input type="range" id="cropLeft" min="0" max="200" value="0" style="--value:0%;">
+                            <span class="slider-value"><span id="cropLeftVal">0</span>px</span>
+                        </div>
+                        <div class="slider-row">
+                            <label style="font-size: 12px; min-width: 50px;">➡️ Right:</label>
+                            <input type="range" id="cropRight" min="0" max="200" value="0" style="--value:0%;">
+                            <span class="slider-value"><span id="cropRightVal">0</span>px</span>
+                        </div>
+                        <p style="font-size: 11px; color: #999; margin-top: 8px;">💡 Tip: Start with 20-30px on each side</p>
+                    </div>
+                    
+                    <div id="autoCropControls" style="display:none;">
+                        <p style="font-size: 12px; color: #1f8fa3; font-weight: 600; margin-bottom: 12px;">Auto-detect white margins:</p>
+                        <div class="slider-row">
+                            <label style="font-size: 12px; min-width: 80px;">Sensitivity:</label>
+                            <input type="range" id="cropThreshold" min="50" max="95" value="75" style="--value:55%;">
+                            <span class="slider-value"><span id="cropVal">75</span>%</span>
+                        </div>
+                        <p style="font-size: 11px; color: #999; margin-top: 8px;">💡 Higher = more aggressive cropping</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <div class="control-label">⚪ Add White Padding</div>
+                <div class="toggle-row"><label for="padding">Add white margins</label><div class="toggle-switch" id="paddingToggle"></div></div>
+                <input type="checkbox" id="padding" style="display:none;">
+                <p class="desc">Adds clean white space around content (after cropping)</p>
+                <div class="slider-group" id="paddingSlider" style="display:none;">
+                    <div class="slider-row"><label style="font-size: 12px; min-width: 60px;">Padding:</label><input type="number" id="paddingAmount" class="number-input" value="20" min="0" max="100"><span style="font-size: 12px; color: #999;">px</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="advanced" class="tab-content">
+            <div class="control-section">
+                <div class="control-label">🔤 Text Enhancement</div>
+                <div class="toggle-row"><label for="enhance">Sharpen & boost text</label><div class="toggle-switch" id="enhanceToggle"></div></div>
+                <input type="checkbox" id="enhance" style="display:none;">
+                <p class="desc">Makes faded text crisp and readable</p>
+                <div class="slider-group" id="enhanceSlider" style="display:none;">
+                    <div class="slider-row"><input type="range" id="enhanceStrength" min="0" max="100" value="50" style="--value:50%;"><span class="slider-value"><span id="enhanceVal">50</span>%</span></div>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <div class="control-label">🎨 Contrast Boost</div>
+                <div class="toggle-row"><label for="contrast">Increase contrast</label><div class="toggle-switch" id="contrastToggle"></div></div>
+                <input type="checkbox" id="contrast" style="display:none;">
+                <p class="desc">Makes text darker and background lighter</p>
+                <div class="slider-group" id="contrastSlider" style="display:none;">
+                    <div class="slider-row"><input type="range" id="contrastStrength" min="0" max="100" value="50" style="--value:50%;"><span class="slider-value"><span id="contrastVal">50</span>%</span></div>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <div class="control-label">🔆 Brightness & Gamma</div>
+                <div class="toggle-row"><label for="brightness">Adjust brightness</label><div class="toggle-switch" id="brightnessToggle"></div></div>
+                <input type="checkbox" id="brightness" style="display:none;">
+                <p class="desc">Fixes over/under exposed pages</p>
+                <div class="slider-group" id="brightnessSlider" style="display:none;">
+                    <div class="slider-row"><label style="font-size: 12px; min-width: 60px;">Gamma:</label><input type="range" id="gammaValue" min="0.5" max="2.5" step="0.1" value="1.0" style="--value:25%;"><span class="slider-value"><span id="gammaVal">1.0</span></span></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="quality" class="tab-content">
+            <div class="control-section">
+                <div class="control-label">📐 Output Resolution</div>
+                <div class="slider-group">
+                    <div class="slider-row"><label style="font-size: 12px; min-width: 80px;">Scale (DPI):</label><input type="range" id="outputScale" min="1.0" max="3.0" step="0.1" value="2.0" style="--value:50%;"><span class="slider-value"><span id="scaleVal">2.0</span>x</span></div>
+                </div>
+                <p class="desc" style="margin-top: 8px;">🔥 <strong>2.0x = HIGH QUALITY</strong> (recommended). Higher = sharper but bigger file.</p>
+            </div>
+
+            <div class="control-section">
+                <div class="control-label">🖼️ Image Format</div>
+                <div class="slider-group">
+                    <div class="slider-row">
+                        <label style="font-size: 12px; min-width: 80px;">Format:</label>
+                        <select id="imageFormat" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 6px; background: white; color: #1a2332; font-size: 13px;">
+                            <option value="png">PNG (Lossless - Best Quality)</option>
+                            <option value="jpeg">JPEG (Smaller file)</option>
+                        </select>
+                    </div>
+                </div>
+                <p class="desc" style="margin-top: 8px;">🔥 <strong>PNG = NO BLUR!</strong> Use JPEG only if file size matters.</p>
+            </div>
+
+            <div class="control-section" id="jpegQualitySection" style="display:none;">
+                <div class="control-label">💾 JPEG Quality</div>
+                <div class="slider-group">
+                    <div class="slider-row"><label style="font-size: 12px; min-width: 80px;">Quality:</label><input type="range" id="jpegQuality" min="0.90" max="1.0" step="0.01" value="0.98" style="--value:80%;"><span class="slider-value"><span id="qualityVal">98</span>%</span></div>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <div class="control-label">🎯 Sharpness Filter</div>
+                <div class="toggle-row"><label for="sharpen">Apply sharpening</label><div class="toggle-switch" id="sharpenToggle"></div></div>
+                <input type="checkbox" id="sharpen" style="display:none;">
+                <p class="desc">Makes details crisp (use carefully)</p>
+                <div class="slider-group" id="sharpenSlider" style="display:none;">
+                    <div class="slider-row"><input type="range" id="sharpenAmount" min="0" max="100" value="30" style="--value:30%;"><span class="slider-value"><span id="sharpenVal">30</span>%</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="circular-progress">
+                <svg viewBox="0 0 200 200">
+                    <defs>
+                        <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#1f8fa3;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <circle cx="100" cy="100" r="90" class="progress-bg"></circle>
+                    <circle cx="100" cy="100" r="90" class="progress-fill" id="progressFill"></circle>
+                </svg>
+                <div class="progress-text" id="progressPercent">0%</div>
+            </div>
+            <div class="progress-info">
+                <div class="progress-info-text">Processing PDF...</div>
+                <div class="progress-info-detail" id="progressDetail">Page 0 of 0</div>
+                <div class="progress-info-detail" id="progressTime">⏱️ Time: 0s</div>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn--process" id="processBtn" disabled>⚡ Process PDF</button>
+            <button class="btn btn--download" id="downloadBtn">📥 Download PDF</button>
+            <button class="btn btn--reset" id="resetBtn">🗑️ Reset</button>
+        </div>
+    </div>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        let pdf = null, processedBlob = null, downloadCount = 0, startTime = 0;
+        let cropMode = 'manual';
+
+        const darkToggle = document.getElementById('darkToggle');
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        if (isDarkMode) { document.body.classList.add('dark-mode'); darkToggle.classList.add('active'); }
+        darkToggle.addEventListener('click', () => { document.body.classList.toggle('dark-mode'); darkToggle.classList.toggle('active'); localStorage.setItem('darkMode', document.body.classList.contains('dark-mode')); });
+
+        document.querySelectorAll('.tab').forEach(tab => { tab.addEventListener('click', () => { const tabName = tab.dataset.tab; document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); tab.classList.add('active'); document.getElementById(tabName).classList.add('active'); }); });
+
+        document.getElementById('cropModeManual').addEventListener('click', () => {
+            cropMode = 'manual';
+            document.getElementById('cropModeManual').classList.add('active');
+            document.getElementById('cropModeAuto').classList.remove('active');
+            document.getElementById('manualCropControls').style.display = 'block';
+            document.getElementById('autoCropControls').style.display = 'none';
+        });
+
+        document.getElementById('cropModeAuto').addEventListener('click', () => {
+            cropMode = 'auto';
+            document.getElementById('cropModeAuto').classList.add('active');
+            document.getElementById('cropModeManual').classList.remove('active');
+            document.getElementById('manualCropControls').style.display = 'none';
+            document.getElementById('autoCropControls').style.display = 'block';
+        });
+
+        document.getElementById('imageFormat').addEventListener('change', (e) => {
+            const jpegSection = document.getElementById('jpegQualitySection');
+            jpegSection.style.display = e.target.value === 'jpeg' ? 'block' : 'none';
+        });
+
+        function setupToggle(toggleId, checkboxId, sliderId) {
+            const toggle = document.getElementById(toggleId), checkbox = document.getElementById(checkboxId), slider = document.getElementById(sliderId);
+            toggle.addEventListener('click', () => { checkbox.checked = !checkbox.checked; toggle.classList.toggle('active'); if (slider) slider.style.display = checkbox.checked ? 'block' : 'none'; });
+        }
+
+        setupToggle('alignToggle', 'align', 'alignSlider'); 
+        setupToggle('deleteToggle', 'delete', 'deleteSlider'); 
+        setupToggle('enhanceToggle', 'enhance', 'enhanceSlider'); 
+        setupToggle('cropEnableToggle', 'cropEnable', 'cropOptions'); 
+        setupToggle('reverseToggle', 'reverse', null); 
+        setupToggle('paddingToggle', 'padding', 'paddingSlider'); 
+        setupToggle('contrastToggle', 'contrast', 'contrastSlider'); 
+        setupToggle('brightnessToggle', 'brightness', 'brightnessSlider'); 
+        setupToggle('sharpenToggle', 'sharpen', 'sharpenSlider');
+
+        ['alignStrength', 'enhanceStrength', 'contrastStrength', 'gammaValue', 'outputScale', 'jpegQuality', 'sharpenAmount', 'cropThreshold', 'cropTop', 'cropBottom', 'cropLeft', 'cropRight'].forEach(id => {
+            const el = document.getElementById(id);
+            el.addEventListener('input', (e) => {
+                const map = { alignStrength: 'alignVal', enhanceStrength: 'enhanceVal', contrastStrength: 'contrastVal', gammaValue: 'gammaVal', outputScale: 'scaleVal', jpegQuality: 'qualityVal', sharpenAmount: 'sharpenVal', cropThreshold: 'cropVal', cropTop: 'cropTopVal', cropBottom: 'cropBottomVal', cropLeft: 'cropLeftVal', cropRight: 'cropRightVal' };
+                const display = document.getElementById(map[id]);
+                if (id === 'jpegQuality') display.textContent = Math.round(e.target.value * 100);
+                else if (id === 'outputScale' || id === 'gammaValue') display.textContent = e.target.value;
+                else display.textContent = e.target.value;
+                
+                let percent = 0;
+                if (id === 'cropThreshold') percent = ((e.target.value - 50) / 45) * 100;
+                else if (id === 'gammaValue') percent = ((e.target.value - 0.5) / 2) * 100;
+                else if (id === 'outputScale') percent = ((e.target.value - 1.0) / 2.0) * 100;
+                else if (id === 'jpegQuality') percent = ((e.target.value - 0.90) / 0.10) * 100;
+                else if (id.startsWith('crop') && id !== 'cropThreshold') percent = (e.target.value / 200) * 100;
+                else percent = e.target.value;
+                
+                e.target.style.setProperty('--value', percent + '%');
+            });
+        });
+
+        document.getElementById('uploadZone').addEventListener('click', () => { document.getElementById('fileInput').click(); });
+
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            showStatus(`Loading ${file.name}...`, 'info');
+            const arrayBuffer = await file.arrayBuffer();
+            pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('pageCount').textContent = pdf.numPages;
+            document.getElementById('fileSize').textContent = (file.size / 1024 / 1024).toFixed(2) + 'MB';
+            document.getElementById('fileInfo').style.display = 'block';
+            document.getElementById('settings').style.display = 'block';
+            document.getElementById('processBtn').disabled = false;
+            document.getElementById('downloadBtn').classList.remove('show');
+            document.getElementById('resetBtn').classList.add('show');
+            processedBlob = null;
+            downloadCount = 0;
+            showStatus(`✅ ${pdf.numPages} pages loaded`, 'success');
+        });
+
+        function parsePageNumbers(input, totalPages) {
+            const pages = new Set(), parts = input.split(',').map(s => s.trim());
+            for (const part of parts) {
+                if (part.includes('-')) {
+                    const [start, end] = part.split('-').map(s => parseInt(s.trim()));
+                    for (let i = Math.max(1, start); i <= Math.min(totalPages, end); i++) pages.add(i);
+                } else {
+                    const num = parseInt(part);
+                    if (num >= 1 && num <= totalPages) pages.add(num);
+                }
+            }
+            return Array.from(pages).sort((a, b) => a - b);
+        }
+
+        function detectAlignment(imgData) {
+            const w = imgData.width, h = imgData.height, data = imgData.data;
+            let leftEdge = w, rightEdge = 0;
+            const checkHeight = Math.floor(h * 0.5), startY = Math.floor(h * 0.25);
+            for (let y = startY; y < startY + checkHeight; y++) {
+                for (let x = 0; x < w; x++) {
+                    const idx = (y * w + x) * 4, gray = (data[idx] + data[idx+1] + data[idx+2]) / 3;
+                    if (gray < 200) { leftEdge = Math.min(leftEdge, x); rightEdge = Math.max(rightEdge, x); }
+                }
+            }
+            if (leftEdge === w || rightEdge === 0) return 0;
+            const contentCenter = (leftEdge + rightEdge) / 2, pageCenter = w / 2;
+            return Math.round((pageCenter - contentCenter) * 0.95);
+        }
+
+        function enhance(imageData, strength) {
+            const d = imageData.data, amount = strength / 100;
+            for (let i = 0; i < d.length; i += 4) {
+                const r = d[i], g = d[i+1], b = d[i+2], lum = 0.299 * r + 0.587 * g + 0.114 * b;
+                d[i] = Math.max(0, Math.min(255, r + (r - lum) * amount * 0.6));
+                d[i+1] = Math.max(0, Math.min(255, g + (g - lum) * amount * 0.6));
+                d[i+2] = Math.max(0, Math.min(255, b + (b - lum) * amount * 0.6));
+            }
+            return imageData;
+        }
+
+        function applyContrast(imageData, strength) {
+            const d = imageData.data, amount = strength / 100, factor = (259 * (amount + 255)) / (255 * (259 - amount));
+            for (let i = 0; i < d.length; i += 4) {
+                d[i] = Math.max(0, Math.min(255, factor * (d[i] - 128) + 128));
+                d[i+1] = Math.max(0, Math.min(255, factor * (d[i+1] - 128) + 128));
+                d[i+2] = Math.max(0, Math.min(255, factor * (d[i+2] - 128) + 128));
+            }
+            return imageData;
+        }
+
+        function applyGamma(imageData, gamma) {
+            const d = imageData.data, invGamma = 1 / gamma;
+            for (let i = 0; i < d.length; i += 4) {
+                d[i] = Math.pow(d[i] / 255, invGamma) * 255;
+                d[i+1] = Math.pow(d[i+1] / 255, invGamma) * 255;
+                d[i+2] = Math.pow(d[i+2] / 255, invGamma) * 255;
+            }
+            return imageData;
+        }
+
+        function applySharpen(imageData, amount) {
+            const w = imageData.width, h = imageData.height, d = imageData.data, amt = amount / 100 * 0.5;
+            const kernel = [0, -amt, 0, -amt, 1 + 4*amt, -amt, 0, -amt, 0];
+            for (let y = 1; y < h - 1; y++) {
+                for (let x = 1; x < w - 1; x++) {
+                    const idx = (y * w + x) * 4;
+                    let r = 0, g = 0, b = 0;
+                    for (let ky = -1; ky <= 1; ky++) {
+                        for (let kx = -1; kx <= 1; kx++) {
+                            const pidx = ((y + ky) * w + (x + kx)) * 4, k = kernel[(ky + 1) * 3 + (kx + 1)];
+                            r += d[pidx] * k; g += d[pidx + 1] * k; b += d[pidx + 2] * k;
+                        }
+                    }
+                    d[idx] = Math.max(0, Math.min(255, r));
+                    d[idx + 1] = Math.max(0, Math.min(255, g));
+                    d[idx + 2] = Math.max(0, Math.min(255, b));
+                }
+            }
+            return imageData;
+        }
+
+        function addWhitePadding(canvas, padding) {
+            const newCanvas = document.createElement('canvas');
+            newCanvas.width = canvas.width + padding * 2;
+            newCanvas.height = canvas.height + padding * 2;
+            const ctx = newCanvas.getContext('2d');
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+            ctx.drawImage(canvas, padding, padding);
+            return newCanvas;
+        }
+
+        async function detectMargins(page, scale) {
+            const vp = page.getViewport({ scale: scale });
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d', { alpha: false, willReadFrequently: false });
+            canvas.width = vp.width;
+            canvas.height = vp.height;
+            
+            await page.render({ 
+                canvasContext: ctx, 
+                viewport: vp,
+                intent: 'print'
+            }).promise;
+            
+            const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            const threshold = (parseInt(document.getElementById('cropThreshold').value) / 100) * 255;
+            let minX = canvas.width, maxX = 0, minY = canvas.height, maxY = 0;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                const b = (data[i] + data[i+1] + data[i+2]) / 3;
+                if (b < threshold) {
+                    const idx = i / 4, x = idx % canvas.width, y = Math.floor(idx / canvas.width);
+                    minX = Math.min(minX, x); maxX = Math.max(maxX, x); minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+                }
+            }
+            
+            return { x: Math.max(0, minX), y: Math.max(0, minY), w: Math.max(100, maxX - minX), h: Math.max(100, maxY - minY) };
+        }
+
+        function updateCircularProgress(current, total) {
+            const percent = Math.round((current / total) * 100);
+            const radius = 90, circumference = 2 * Math.PI * radius;
+            const dashoffset = circumference - (percent / 100) * circumference;
+            document.getElementById('progressFill').style.strokeDasharray = `${circumference - dashoffset} ${circumference}`;
+            document.getElementById('progressPercent').textContent = percent + '%';
+            const elapsed = Math.round((Date.now() - startTime) / 1000);
+            document.getElementById('progressTime').textContent = `⏱️ Time: ${elapsed}s`;
+            document.getElementById('progressDetail').textContent = `Page ${current} of ${total}`;
+        }
+
+        document.getElementById('processBtn').addEventListener('click', async () => {
+            if (!pdf) return;
+            startTime = Date.now();
+            document.getElementById('progressContainer').classList.add('show');
+            document.getElementById('processBtn').disabled = true;
+            try {
+                const doAlign = document.getElementById('align').checked;
+                const alignAmt = parseInt(document.getElementById('alignStrength').value);
+                const doDelete = document.getElementById('delete').checked;
+                const deleteInput = document.getElementById('deletePages').value;
+                const doEnhance = document.getElementById('enhance').checked;
+                const enhanceAmt = parseInt(document.getElementById('enhanceStrength').value);
+                const doCrop = document.getElementById('cropEnable').checked;
+                const doReverse = document.getElementById('reverse').checked;
+                const doPadding = document.getElementById('padding').checked;
+                const paddingAmt = parseInt(document.getElementById('paddingAmount').value);
+                const doContrast = document.getElementById('contrast').checked;
+                const contrastAmt = parseInt(document.getElementById('contrastStrength').value);
+                const doBrightness = document.getElementById('brightness').checked;
+                const gammaVal = parseFloat(document.getElementById('gammaValue').value);
+                const outputScale = parseFloat(document.getElementById('outputScale').value);
+                const imageFormat = document.getElementById('imageFormat').value;
+                const jpegQuality = parseFloat(document.getElementById('jpegQuality').value);
+                const doSharpen = document.getElementById('sharpen').checked;
+                const sharpenAmt = parseInt(document.getElementById('sharpenAmount').value);
+
+                const cropTop = parseInt(document.getElementById('cropTop').value);
+                const cropBottom = parseInt(document.getElementById('cropBottom').value);
+                const cropLeft = parseInt(document.getElementById('cropLeft').value);
+                const cropRight = parseInt(document.getElementById('cropRight').value);
+
+                let pagesToDelete = new Set();
+                if (doDelete && deleteInput.trim()) {
+                    try {
+                        pagesToDelete = new Set(parsePageNumbers(deleteInput, pdf.numPages));
+                    } catch (e) {
+                        showStatus('Invalid page format. Use: 1,2,5 or 1-3,5', 'error');
+                        document.getElementById('progressContainer').classList.remove('show');
+                        document.getElementById('processBtn').disabled = false;
+                        return;
+                    }
+                }
+
+                const { PDFDocument } = PDFLib;
+                const pdfDoc = await PDFDocument.create();
+                let pages = [];
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    if (!pagesToDelete.has(i)) {
+                        pages.push(await pdf.getPage(i));
+                    }
+                }
+
+                if (doReverse) pages.reverse();
+
+                for (let i = 0; i < pages.length; i++) {
+                    const page = pages[i];
+                    
+                    let box = { x: 0, y: 0, w: 0, h: 0 };
+                    
+                    if (doCrop && cropMode === 'auto') {
+                        box = await detectMargins(page, outputScale);
+                    } else if (doCrop && cropMode === 'manual') {
+                        const origVp = page.getViewport({ scale: outputScale });
+                        box = {
+                            x: cropLeft * outputScale,
+                            y: cropTop * outputScale,
+                            w: origVp.width - (cropLeft + cropRight) * outputScale,
+                            h: origVp.height - (cropTop + cropBottom) * outputScale
+                        };
+                        box.w = Math.max(100, box.w);
+                        box.h = Math.max(100, box.h);
+                    } else {
+                        const origVp = page.getViewport({ scale: outputScale });
+                        box = { x: 0, y: 0, w: origVp.width, h: origVp.height };
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d', { alpha: false, willReadFrequently: false });
+                    canvas.width = Math.round(box.w);
+                    canvas.height = Math.round(box.h);
+
+                    const vp = page.getViewport({
+                        scale: outputScale,
+                        offsetX: -box.x,
+                        offsetY: -box.y
+                    });
+
+                    await page.render({ 
+                        canvasContext: ctx, 
+                        viewport: vp,
+                        intent: 'print',
+                        renderInteractiveForms: false
+                    }).promise;
+
+                    let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    
+                    if (doAlign && alignAmt > 0) {
+                        const shift = detectAlignment(imgData) * (alignAmt / 100);
+                        if (Math.abs(shift) > 0.5) {
+                            const tempCanvas = document.createElement('canvas');
+                            tempCanvas.width = canvas.width;
+                            tempCanvas.height = canvas.height;
+                            const tempCtx = tempCanvas.getContext('2d');
+                            tempCtx.fillStyle = 'white';
+                            tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                            tempCtx.putImageData(imgData, Math.round(shift), 0);
+                            imgData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
+                        }
+                    }
+
+                    if (doContrast && contrastAmt > 0) {
+                        imgData = applyContrast(imgData, contrastAmt);
+                    }
+
+                    if (doBrightness && gammaVal !== 1.0) {
+                        imgData = applyGamma(imgData, gammaVal);
+                    }
+
+                    if (doEnhance && enhanceAmt > 0) {
+                        imgData = enhance(imgData, enhanceAmt);
+                    }
+
+                    if (doSharpen && sharpenAmt > 0) {
+                        imgData = applySharpen(imgData, sharpenAmt);
+                    }
+                    
+                    ctx.putImageData(imgData, 0, 0);
+
+                    let finalCanvas = canvas;
+                    if (doPadding && paddingAmt > 0) {
+                        finalCanvas = addWhitePadding(canvas, paddingAmt);
+                    }
+
+                    const imgUrl = imageFormat === 'png' 
+                        ? finalCanvas.toDataURL('image/png')
+                        : finalCanvas.toDataURL('image/jpeg', jpegQuality);
+                    
+                    const newPage = pdfDoc.addPage([finalCanvas.width, finalCanvas.height]);
+                    const image = imageFormat === 'png' 
+                        ? await pdfDoc.embedPng(imgUrl)
+                        : await pdfDoc.embedJpg(imgUrl);
+                    
+                    newPage.drawImage(image, { x: 0, y: 0, width: finalCanvas.width, height: finalCanvas.height });
+
+                    updateCircularProgress(i + 1, pages.length);
+                }
+
+                const pdfBytes = await pdfDoc.save();
+                processedBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+                
+                document.getElementById('progressContainer').classList.remove('show');
+                document.getElementById('processBtn').disabled = false;
+                document.getElementById('downloadBtn').classList.add('show');
+                downloadCount = 0;
+                showStatus('✅ Done! Ready to download', 'success');
+            } catch (e) {
+                document.getElementById('progressContainer').classList.remove('show');
+                document.getElementById('processBtn').disabled = false;
+                showStatus('❌ Error: ' + e.message, 'error');
+                console.error(e);
+            }
+        });
+
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            if (!processedBlob) {
+                showStatus('No PDF to download', 'error');
+                return;
+            }
+            try {
+                downloadCount++;
+                const date = new Date();
+                const dateStr = date.toISOString().slice(0,10);
+                const timeStr = date.toTimeString().slice(0,8).replace(/:/g, '');
+                const filename = 'lunapdf_' + dateStr + '_' + timeStr + '_' + downloadCount + '.pdf';
+                
+                const url = URL.createObjectURL(processedBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                link.style.position = 'fixed';
+                link.style.top = '-9999px';
+                link.style.left = '-9999px';
+                
+                document.body.appendChild(link);
+                link.click();
+                
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                }, 100);
+                
+                const sizeMB = (processedBlob.size / 1024 / 1024).toFixed(2);
+                showStatus(`✅ Downloaded (${sizeMB}MB)`, 'success');
+            } catch (err) {
+                showStatus('❌ Download error', 'error');
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            location.reload();
+        });
+
+        function showStatus(msg, type) {
+            const el = document.getElementById('status');
+            el.textContent = msg;
+            el.className = 'status show ' + type;
+            setTimeout(() => el.classList.remove('show'), 5000);
+        }
+
+        showStatus('🌙 Ready to process PDFs!', 'info');
+    </script>
+</body>
+</html>
